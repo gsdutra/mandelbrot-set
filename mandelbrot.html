@@ -66,12 +66,12 @@
         function belongs(re, im, iterations) {
             var z = new Complex(0, 0);
             var c = new Complex(re, im);
-            var i = 0;
-            while (z.abs() < 2 && i < iterations) {
+            var it = 0;
+            while (z.abs() < 2 && it < iterations) {
             z = z.mul(z).add(c);
-            i++;
+            it++;
             }
-            return i;
+            return it;
         }
 
         var canvas = document.getElementById('canvas');
@@ -110,15 +110,15 @@
             document.getElementById('loading').classList.add('hidden')
         };
         var globalMaxIterations = 100; 
-        var windowWidth = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
+        var windowWidth = 700;
         windowWidth = windowWidth - 60;
         var centerRe = -0.5, centerIm = 0
         var sizeRe = 1.5, sizeIm = 1.5    
-        var i = 1;
-        var zoomValue = Math.pow(1.6, i)
+        var zoomLevel = 0;
+        var zoomValue = Math.pow(1.7, zoomLevel)
         var minRe = centerRe - sizeRe/zoomValue, maxRe = centerRe + sizeRe/zoomValue, minIm = centerIm - sizeIm/zoomValue, maxIm = centerIm + sizeIm/zoomValue;
         draw(windowWidth, windowWidth, globalMaxIterations, minRe, maxRe, minIm, maxIm);
-        document.getElementById('zoom-value').innerText = i;
+        document.getElementById('zoom-value').innerText = zoomLevel;
         document.getElementById('pos-value').innerHTML = "Im: "+centerIm.toFixed(2)+"<br/> Re: "+centerRe.toFixed(2);
         document.getElementById('iterations-value').innerText = globalMaxIterations;
         
@@ -147,25 +147,25 @@
 
         function zoom(direction) {
             //loading();
-            direction === 'in'? i ++ : i-- ;
-            if (i < 0) i = 0;
-            var zoomValue = Math.pow(1.2, i)
+            direction === 'in'? zoomLevel ++ : zoomLevel-- ;
+            if (zoomLevel < 0) zoomLevel = 0;
+            var zoomValue = Math.pow(1.7, zoomLevel)
             var minRe = centerRe - sizeRe/zoomValue, maxRe = centerRe + sizeRe/zoomValue, minIm = centerIm - sizeIm/zoomValue, maxIm = centerIm + sizeIm/zoomValue;
 
             draw(windowWidth, windowWidth, globalMaxIterations, minRe, maxRe, minIm, maxIm);
 
-            document.getElementById('zoom-value').innerText = i;
+            document.getElementById('zoom-value').innerText = zoomLevel;
             //notLoading();
         }
 
         function move(direction) {
             //loading();
-            if (direction === 'up') centerIm -= 1/Math.pow(1.2, i);
-            if (direction === 'left') centerRe -= 1/Math.pow(1.2, i);
-            if (direction === 'right') centerRe += 1/Math.pow(1.2, i);
-            if (direction === 'down') centerIm += 1/Math.pow(1.2, i);
+            if (direction === 'up') centerIm -= 0.3/Math.pow(1.7, zoomLevel);
+            if (direction === 'left') centerRe -= 0.3/Math.pow(1.7, zoomLevel);
+            if (direction === 'right') centerRe += 0.3/Math.pow(1.7, zoomLevel);
+            if (direction === 'down') centerIm += 0.3/Math.pow(1.7, zoomLevel);
 
-            var zoomValue = Math.pow(1.2, i)
+            var zoomValue = Math.pow(1.7, zoomLevel)
             var minRe = centerRe - sizeRe/zoomValue, maxRe = centerRe + sizeRe/zoomValue, minIm = centerIm - sizeIm/zoomValue, maxIm = centerIm + sizeIm/zoomValue;
 
             draw(windowWidth, windowWidth, globalMaxIterations, minRe, maxRe, minIm, maxIm);
@@ -185,7 +185,7 @@
             if (operation === 'sub') globalMaxIterations -= increment;
             if (globalMaxIterations === 0) globalMaxIterations = 9 * increment / 10;
 
-            var zoomValue = Math.pow(1.6, i)
+            var zoomValue = Math.pow(1.7, zoomLevel)
             var minRe = centerRe - sizeRe/zoomValue, maxRe = centerRe + sizeRe/zoomValue, minIm = centerIm - sizeIm/zoomValue, maxIm = centerIm + sizeIm/zoomValue;
             draw(windowWidth, windowWidth, globalMaxIterations, minRe, maxRe, minIm, maxIm);
 
