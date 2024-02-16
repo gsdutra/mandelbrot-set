@@ -1,0 +1,271 @@
+<html>
+  <head>
+    <title>Mandelbrot Set</title>
+  </head>
+  <body>
+    <div class="loading flex-col-center hidden" id="loading">
+        <img src="https://i.gifer.com/origin/34/34338d26023e5515f6cc8969aa027bca.gif"/>
+    </div>
+    <div style="display:flex; justify-content:center; width: 100vw;">
+        <a class="title">
+            Mandelbrot set
+        </a>
+    </div>
+    <div class="control-box">
+        <a class="control-txt">Controls:</a>
+        <div class="flex-col-center">
+            <a class="control-txt">Zoom</a>
+            <div>
+                <button id="zoom-out" style="font-size: 20px;"> - </button>
+                <button id="zoom-in" style="font-size: 20px;"> + </button>
+            </div>
+            <a id="zoom-value" style="color:#566"></a>
+        </div>
+        <div class="flex-col-center">
+            <a class="control-txt">Position</a>
+            <div class="flex-col-center">
+                <button id="move-up"> 🢁 </button>
+                <div>
+                    <button id="move-left"> 🢀 </button>
+                    <button id="move-right" style="margin-left: 18px;"> 🢂 </button>
+                </div>
+                <button id="move-down"> 🢃 </button>
+            </div>
+            <a id="pos-value" style="color:#566"></a>
+        </div>
+        <div class="flex-col-center">
+            <a class="control-txt">Iterations</a>
+            <div>
+                <button id="iterations-sub" style="font-size: 20px;"> - </button>
+                <button id="iterations-add" style="font-size: 20px;"> + </button>
+            </div>
+            <a id="iterations-value" style="color:#566"></a>
+        </div>
+    </div>
+    <div class="center-canvas">
+        <canvas id="canvas" width="600" height="600"></canvas>
+    </div>
+    <script>
+        function Complex(re, im) {
+            this.re = re;
+            this.im = im;
+        }
+
+        Complex.prototype.add = function(other) {
+            return new Complex(this.re + other.re, this.im + other.im);
+        }
+
+        Complex.prototype.mul = function(other) {
+            return new Complex(this.re * other.re - this.im * other.im, this.re * other.im + this.im * other.re);
+        }
+
+        Complex.prototype.abs = function() {
+            return Math.sqrt(this.re * this.re + this.im * this.im);
+        }
+
+        function belongs(re, im, iterations) {
+            var z = new Complex(0, 0);
+            var c = new Complex(re, im);
+            var i = 0;
+            while (z.abs() < 2 && i < iterations) {
+            z = z.mul(z).add(c);
+            i++;
+            }
+            return i;
+        }
+
+        var canvas = document.getElementById('canvas');
+        var ctx = canvas.getContext('2d');
+
+        function pixel(x, y, color) {
+            ctx.fillStyle = color;
+            ctx.fillRect(x, y, 1, 1);
+        }
+
+        function draw(width, height, maxIterations, minRe, maxRe, minIm, maxIm) {
+            var reStep = (maxRe - minRe) / width, imStep = (maxIm - minIm) / height;
+            var re = minRe;
+            while (re < maxRe) {
+            var im = minIm;
+            while (im < maxIm) {
+                var result = belongs(re, im, maxIterations);
+                var x = (re - minRe) / reStep, y = (im - minIm) / imStep;
+                if (result == maxIterations) {
+                pixel(x, y, 'black');
+                } else {
+                var h = 30 + Math.round(120 * result * 1.0 / maxIterations);
+                var color = 'hsl(' + h + ', 100%, 50%)';
+                pixel(x, y, color);
+                }
+                im += imStep;
+            }
+            re += reStep;
+            }
+        }
+
+        function loading() {
+            document.getElementById('loading').classList.remove('hidden')
+        };
+        function notLoading() {
+            document.getElementById('loading').classList.add('hidden')
+        };
+        var globalMaxIterations = 100; 
+        var windowWidth = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
+        windowWidth = windowWidth - 60;
+        var centerRe = -0.5, centerIm = 0
+        var sizeRe = 1.5, sizeIm = 1.5    
+        var i = 1;
+        var zoomValue = Math.pow(1.6, i)
+        var minRe = centerRe - sizeRe/zoomValue, maxRe = centerRe + sizeRe/zoomValue, minIm = centerIm - sizeIm/zoomValue, maxIm = centerIm + sizeIm/zoomValue;
+        draw(windowWidth, windowWidth, globalMaxIterations, minRe, maxRe, minIm, maxIm);
+        document.getElementById('zoom-value').innerText = i;
+        document.getElementById('pos-value').innerHTML = "Im: "+centerIm.toFixed(2)+"<br/> Re: "+centerRe.toFixed(2);
+        document.getElementById('iterations-value').innerText = globalMaxIterations;
+        
+        // event listeners
+        const zoomIn = document.getElementById('zoom-in');
+        const zoomOut = document.getElementById('zoom-out');
+
+        const moveUp = document.getElementById('move-up');
+        const moveLeft = document.getElementById('move-left');
+        const moveRight = document.getElementById('move-right');
+        const moveDown = document.getElementById('move-down');
+
+        const iterationsAdd = document.getElementById('iterations-add');
+        const iterationsSub = document.getElementById('iterations-sub');
+
+        zoomIn.addEventListener('click', () => zoom('in'));
+        zoomOut.addEventListener('click', () => zoom('out'));
+
+        moveUp.addEventListener('click', () => move('up'));
+        moveLeft.addEventListener('click', () => move('left'));
+        moveRight.addEventListener('click', () => move('right'));
+        moveDown.addEventListener('click', () => move('down'));
+
+        iterationsAdd.addEventListener('click', () => changeIterations('add'));
+        iterationsSub.addEventListener('click', () => changeIterations('sub'));
+
+        function zoom(direction) {
+            //loading();
+            direction === 'in'? i ++ : i-- ;
+            if (i < 0) i = 0;
+            var zoomValue = Math.pow(1.2, i)
+            var minRe = centerRe - sizeRe/zoomValue, maxRe = centerRe + sizeRe/zoomValue, minIm = centerIm - sizeIm/zoomValue, maxIm = centerIm + sizeIm/zoomValue;
+
+            draw(windowWidth, windowWidth, globalMaxIterations, minRe, maxRe, minIm, maxIm);
+
+            document.getElementById('zoom-value').innerText = i;
+            //notLoading();
+        }
+
+        function move(direction) {
+            //loading();
+            if (direction === 'up') centerIm -= 1/Math.pow(1.2, i);
+            if (direction === 'left') centerRe -= 1/Math.pow(1.2, i);
+            if (direction === 'right') centerRe += 1/Math.pow(1.2, i);
+            if (direction === 'down') centerIm += 1/Math.pow(1.2, i);
+
+            var zoomValue = Math.pow(1.2, i)
+            var minRe = centerRe - sizeRe/zoomValue, maxRe = centerRe + sizeRe/zoomValue, minIm = centerIm - sizeIm/zoomValue, maxIm = centerIm + sizeIm/zoomValue;
+
+            draw(windowWidth, windowWidth, globalMaxIterations, minRe, maxRe, minIm, maxIm);
+
+            document.getElementById('pos-value').innerText = "Im: "+centerIm.toFixed(11)+" Re: "+centerRe.toFixed(11);
+            //notLoading();
+        }
+
+        function changeIterations(operation) {
+            if (globalMaxIterations === 1 && operation === 'sub') return;
+
+            var increment = 1;
+            if (globalMaxIterations >= 10) increment = 10;
+            if (globalMaxIterations >= 100) increment = 100;
+
+            if (operation === 'add') globalMaxIterations += increment;
+            if (operation === 'sub') globalMaxIterations -= increment;
+            if (globalMaxIterations === 0) globalMaxIterations = 9 * increment / 10;
+
+            var zoomValue = Math.pow(1.6, i)
+            var minRe = centerRe - sizeRe/zoomValue, maxRe = centerRe + sizeRe/zoomValue, minIm = centerIm - sizeIm/zoomValue, maxIm = centerIm + sizeIm/zoomValue;
+            draw(windowWidth, windowWidth, globalMaxIterations, minRe, maxRe, minIm, maxIm);
+
+            document.getElementById('iterations-value').innerText = globalMaxIterations;
+        }
+
+    </script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #111;
+        }
+        canvas {
+            border-radius: 30px;
+            display: block;
+        }
+        .center-canvas {
+            display: flex;
+            justify-content: center;
+            width: 100vw;
+        }
+        .control-box {
+            position: fixed;
+            bottom: 5px;
+            left: 5px;
+            background: #111e;
+            height: 300px;
+            width: 150px;
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            align-items: center;
+            border: 1px solid white;
+        }
+        .control-txt {
+            color: white;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+        .title {
+            font-size: 24px;
+            font-family: Arial, Helvetica, sans-serif;
+            margin: 10px;
+            color: white;
+        }
+        .flex-col-center {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            align-items: center;
+        }
+        button {
+            border: none;
+            border-radius: 10px;
+            margin: 1px;
+            transition: .2s;
+            width: 26px;
+            height: 26px;
+        }
+        button:hover {
+            cursor: pointer;
+            transform: scale(1.1);
+            transition: .2s;
+        }
+        .loading {
+            width: 100vw;
+            height: 100vh;
+            position: fixed;
+            background: #333e;
+            bottom: 0;
+            left: 0;
+        }
+        .loading img {
+            width: 100px;
+            height: auto;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+  </body>
+</html>
