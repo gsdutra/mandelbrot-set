@@ -27,12 +27,12 @@
         <div class="flex-col-center">
             <a class="control-txt">Position</a>
             <div class="flex-col-center">
-                <button id="move-up"> 🢁 </button>
+                <button id="move-up"> <img src="assets/arrow-up.svg"/> </button>
                 <div>
-                    <button id="move-left"> 🢀 </button>
-                    <button id="move-right" style="margin-left: 18px;"> 🢂 </button>
+                    <button id="move-left"> <img src="assets/arrow-left.svg"/> </button>
+                    <button id="move-right" style="margin-left: 18px;"> <img src="assets/arrow-right.svg"/> </button>
                 </div>
-                <button id="move-down"> 🢃 </button>
+                <button id="move-down"> <img src="assets/arrow-down.svg"/> </button>
             </div>
             <a id="pos-value" style="color:#566"></a>
         </div>
@@ -163,10 +163,10 @@
 
         function move(direction) {
             //loading();
-            if (direction === 'up') centerIm -= 0.3/Math.pow(1.7, zoomLevel);
-            if (direction === 'left') centerRe -= 0.3/Math.pow(1.7, zoomLevel);
-            if (direction === 'right') centerRe += 0.3/Math.pow(1.7, zoomLevel);
-            if (direction === 'down') centerIm += 0.3/Math.pow(1.7, zoomLevel);
+            if (direction === 'up') centerIm -= 0.5/Math.pow(1.7, zoomLevel);
+            if (direction === 'left') centerRe -= 0.5/Math.pow(1.7, zoomLevel);
+            if (direction === 'right') centerRe += 0.5/Math.pow(1.7, zoomLevel);
+            if (direction === 'down') centerIm += 0.5/Math.pow(1.7, zoomLevel);
 
             var zoomValue = Math.pow(1.7, zoomLevel)
             var minRe = centerRe - sizeRe/zoomValue, maxRe = centerRe + sizeRe/zoomValue, minIm = centerIm - sizeIm/zoomValue, maxIm = centerIm + sizeIm/zoomValue;
@@ -249,6 +249,7 @@
             transition: .2s;
             width: 26px;
             height: 26px;
+            padding: 6px;
         }
         button:hover {
             cursor: pointer;
@@ -270,6 +271,10 @@
         .hidden {
             display: none;
         }
+        button img {
+            width: 11px;
+            height: auto;
+        }
         @media (max-width: 670px) {
             canvas {
                 width: 100%;
@@ -281,7 +286,6 @@
                 display: flex;
                 justify-content: center;
                 width: 100vw;
-                border: 5px solid rosybrown;
                 margin: 0;
                 padding: 0;
             }
