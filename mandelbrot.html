@@ -117,7 +117,7 @@
                 if (result == maxIterations) {
                 pixel(x, y, 'black');
                 } else {
-                var h = 30 + Math.round(120 * result * 1.0 / maxIterations);
+                var h = 30 + Math.round(300 * result * 1.0 / maxIterations);
                 var color = 'hsl(' + h + ', 100%, 50%)';
                 pixel(x, y, color);
                 }
