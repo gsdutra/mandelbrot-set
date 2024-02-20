@@ -18,8 +18,16 @@
         <a class="control-txt">Controls:</a>
         <div class="flex-col-center">
             <a class="control-txt">Set</a>
-                <button id="change-mandelbrot" style="font-size: 12px; width: auto"> Mandelbrot </button>
-                <button id="change-burning" style="font-size: 12px; width: auto"> Burning ship </button>
+            <select id="select-fractal">
+                <option value="mandelbrot" style="font-size: 12px; width: auto"> Mandelbrot </option>
+                <option value="burning-ship" style="font-size: 12px; width: auto"> Burning ship </option>
+            </select>
+        </div>
+        <div class="flex-col-center">
+            <a class="control-txt">Base color</a>
+                <input type="range" id="set-color" min="0" max="240" value="0">
+            <a class="control-txt">Color range</a>
+                <input type="range" id="set-color-range" min="0" max="240" value="120">
         </div>
         <div class="flex-col-center">
             <a class="control-txt">Zoom</a>
@@ -117,7 +125,7 @@
                 if (result == maxIterations) {
                 pixel(x, y, 'black');
                 } else {
-                var h = 30 + Math.round(300 * result * 1.0 / maxIterations);
+                var h = baseColor + Math.round(colorRange * result * 1.0 / maxIterations);
                 var color = 'hsl(' + h + ', 100%, 50%)';
                 pixel(x, y, color);
                 }
@@ -134,6 +142,8 @@
             document.getElementById('loading').classList.add('hidden')
         };
 
+        var baseColor = 0;
+        var colorRange = 120;
         var showingSet = 'mandelbrot';
         var globalMaxIterations = 100; 
         var windowWidth = 700;
@@ -160,8 +170,10 @@
         const iterationsAdd = document.getElementById('iterations-add');
         const iterationsSub = document.getElementById('iterations-sub');
 
-        const changeMandel = document.getElementById('change-mandelbrot');
-        const changeBurning = document.getElementById('change-burning');
+        const selectFractal = document.getElementById('select-fractal');
+
+        const setColor = document.getElementById('set-color');
+        const setColorRange = document.getElementById('set-color-range');
 
         zoomIn.addEventListener('click', () => zoom('in'));
         zoomOut.addEventListener('click', () => zoom('out'));
@@ -174,14 +186,16 @@
         iterationsAdd.addEventListener('click', () => changeIterations('add'));
         iterationsSub.addEventListener('click', () => changeIterations('sub'));
 
-        changeMandel.addEventListener('click', () => change('mandelbrot'));
-        changeBurning.addEventListener('click', () => change('burning-ship'));
+        selectFractal.addEventListener('change', () => change(selectFractal.value));
+
+        setColor.addEventListener('input', () => setColorFunc(setColor.value));
+        setColorRange.addEventListener('input', () => setColorRangeFunc(setColor.value));
 
         function zoom(direction) {
             //loading();
             direction === 'in'? zoomLevel ++ : zoomLevel-- ;
             if (zoomLevel < 0) zoomLevel = 0;
-            var zoomValue = Math.pow(1.7, zoomLevel)
+            zoomValue = Math.pow(1.7, zoomLevel)
             var minRe = centerRe - sizeRe/zoomValue, maxRe = centerRe + sizeRe/zoomValue, minIm = centerIm - sizeIm/zoomValue, maxIm = centerIm + sizeIm/zoomValue;
 
             draw(windowWidth, windowWidth, globalMaxIterations, minRe, maxRe, minIm, maxIm);
@@ -197,7 +211,6 @@
             if (direction === 'right') centerRe += 0.5/Math.pow(1.7, zoomLevel);
             if (direction === 'down') centerIm += 0.5/Math.pow(1.7, zoomLevel);
 
-            var zoomValue = Math.pow(1.7, zoomLevel)
             var minRe = centerRe - sizeRe/zoomValue, maxRe = centerRe + sizeRe/zoomValue, minIm = centerIm - sizeIm/zoomValue, maxIm = centerIm + sizeIm/zoomValue;
 
             draw(windowWidth, windowWidth, globalMaxIterations, minRe, maxRe, minIm, maxIm);
@@ -217,7 +230,6 @@
             if (operation === 'sub') globalMaxIterations -= increment;
             if (globalMaxIterations === 0) globalMaxIterations = 9 * increment / 10;
 
-            var zoomValue = Math.pow(1.7, zoomLevel)
             var minRe = centerRe - sizeRe/zoomValue, maxRe = centerRe + sizeRe/zoomValue, minIm = centerIm - sizeIm/zoomValue, maxIm = centerIm + sizeIm/zoomValue;
             draw(windowWidth, windowWidth, globalMaxIterations, minRe, maxRe, minIm, maxIm);
 
@@ -226,6 +238,18 @@
 
         function change(newSet) {
             showingSet = newSet;
+            draw(windowWidth, windowWidth, globalMaxIterations, minRe, maxRe, minIm, maxIm);
+        }
+
+        function setColorFunc(value) {
+            baseColor = value;
+            var minRe = centerRe - sizeRe/zoomValue, maxRe = centerRe + sizeRe/zoomValue, minIm = centerIm - sizeIm/zoomValue, maxIm = centerIm + sizeIm/zoomValue;
+            draw(windowWidth, windowWidth, globalMaxIterations, minRe, maxRe, minIm, maxIm);
+        }
+
+        function setColorRangeFunc(value) {
+            colorRange = value;
+            var minRe = centerRe - sizeRe/zoomValue, maxRe = centerRe + sizeRe/zoomValue, minIm = centerIm - sizeIm/zoomValue, maxIm = centerIm + sizeIm/zoomValue;
             draw(windowWidth, windowWidth, globalMaxIterations, minRe, maxRe, minIm, maxIm);
         }
 
