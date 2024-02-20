@@ -21,13 +21,25 @@
             <select id="select-fractal">
                 <option value="mandelbrot" style="font-size: 12px; width: auto"> Mandelbrot </option>
                 <option value="burning-ship" style="font-size: 12px; width: auto"> Burning ship </option>
+                <option value="julia" style="font-size: 12px; width: auto"> Julia </option>
             </select>
+        </div>
+        <div class="flex-col-center" style="border-radius: 10px; background: #3338; padding: 2px;">
+            <a class="control-txt">Julia C value</a>
+                <div class="flex-row-center">
+                    <a style="color: white;">Re</a>
+                    <input style="width: 80%;" type="range" id="set-julia-re" min="-100" max="100" value="0">
+                </div>
+                <div class="flex-row-center">
+                    <a style="color: white;">Im</a>
+                    <input style="width: 80%;" type="range" id="set-julia-im" min="-100" max="100" value="0">
+                </div>
         </div>
         <div class="flex-col-center">
             <a class="control-txt">Base color</a>
                 <input type="range" id="set-color" min="0" max="240" value="0">
-            <a class="control-txt">Color range</a>
-                <input type="range" id="set-color-range" min="0" max="240" value="120">
+            <!--<a class="control-txt">Color range</a>
+                <input type="range" id="set-color-range" min="0" max="360" value="120"> -->
         </div>
         <div class="flex-col-center">
             <a class="control-txt">Zoom</a>
@@ -102,8 +114,16 @@
                     it++;
                 }
                 return it;
+            } else if (showingSet === 'julia') {
+                var c = juliaConstant;
+                var z = new Complex(re, im);
+                var it = 0;
+                while (z.abs() < 2 && it < iterations) {
+                    z = z.mul(z).add(c);
+                    it++;
+                }
+                return it;
             }
-
         }
 
         var canvas = document.getElementById('canvas');
@@ -142,14 +162,15 @@
             document.getElementById('loading').classList.add('hidden')
         };
 
+        var juliaConstant = new Complex(0,0);
         var baseColor = 0;
         var colorRange = 120;
         var showingSet = 'mandelbrot';
         var globalMaxIterations = 100; 
         var windowWidth = 700;
         windowWidth = windowWidth - 60;
-        var centerRe = -0.5, centerIm = 0
-        var sizeRe = 1.5, sizeIm = 1.5    
+        var centerRe = -0.5, centerIm = 0;
+        var sizeRe = 1.5, sizeIm = 1.5;
         var zoomLevel = 0;
         var zoomValue = Math.pow(1.7, zoomLevel)
         var minRe = centerRe - sizeRe/zoomValue, maxRe = centerRe + sizeRe/zoomValue, minIm = centerIm - sizeIm/zoomValue, maxIm = centerIm + sizeIm/zoomValue;
@@ -175,6 +196,9 @@
         const setColor = document.getElementById('set-color');
         const setColorRange = document.getElementById('set-color-range');
 
+        const setJuliaRe = document.getElementById('set-julia-re');
+        const setJuliaIm = document.getElementById('set-julia-im');
+
         zoomIn.addEventListener('click', () => zoom('in'));
         zoomOut.addEventListener('click', () => zoom('out'));
 
@@ -189,7 +213,10 @@
         selectFractal.addEventListener('change', () => change(selectFractal.value));
 
         setColor.addEventListener('input', () => setColorFunc(setColor.value));
-        setColorRange.addEventListener('input', () => setColorRangeFunc(setColor.value));
+        //setColorRange.addEventListener('input', () => setColorRangeFunc(setColor.value));
+
+        setJuliaRe.addEventListener('input', () => setJulia(setJuliaRe.value, juliaConstant.im/100));
+        setJuliaIm.addEventListener('input', () => setJulia(juliaConstant.re, setJuliaIm.value/100));
 
         function zoom(direction) {
             //loading();
@@ -253,6 +280,12 @@
             draw(windowWidth, windowWidth, globalMaxIterations, minRe, maxRe, minIm, maxIm);
         }
 
+        function setJulia(re, im) {
+            juliaConstant = new Complex(re,im);
+            var minRe = centerRe - sizeRe/zoomValue, maxRe = centerRe + sizeRe/zoomValue, minIm = centerIm - sizeIm/zoomValue, maxIm = centerIm + sizeIm/zoomValue;
+            draw(windowWidth, windowWidth, globalMaxIterations, minRe, maxRe, minIm, maxIm);
+        }
+
     </script>
     <style>
         body {
@@ -274,7 +307,7 @@
             bottom: 5px;
             left: 5px;
             background: #111e;
-            height: 400px;
+            height: 500px;
             width: 150px;
             border-radius: 20px;
             display: flex;
@@ -287,6 +320,8 @@
         .control-txt {
             color: white;
             font-family: Arial, Helvetica, sans-serif;
+            font-size: 14px;
+            cursor: default;
         }
         .title {
             font-size: 24px;
@@ -297,6 +332,12 @@
         .flex-col-center {
             display: flex;
             flex-direction: column;
+            justify-content: space-around;
+            align-items: center;
+        }
+        .flex-row-center {
+            display: flex;
+            flex-direction: row;
             justify-content: space-around;
             align-items: center;
         }
