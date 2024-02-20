@@ -17,6 +17,11 @@
     <div class="control-box">
         <a class="control-txt">Controls:</a>
         <div class="flex-col-center">
+            <a class="control-txt">Set</a>
+                <button id="change-mandelbrot" style="font-size: 12px; width: auto"> Mandelbrot </button>
+                <button id="change-burning" style="font-size: 12px; width: auto"> Burning ship </button>
+        </div>
+        <div class="flex-col-center">
             <a class="control-txt">Zoom</a>
             <div>
                 <button id="zoom-out" style="font-size: 20px;"> - </button>
@@ -66,15 +71,31 @@
             return Math.sqrt(this.re * this.re + this.im * this.im);
         }
 
+        Complex.prototype.absolute = function() {
+            return new Complex(Math.abs(this.re), Math.abs(this.im));
+        }
+
         function belongs(re, im, iterations) {
-            var z = new Complex(0, 0);
-            var c = new Complex(re, im);
-            var it = 0;
-            while (z.abs() < 2 && it < iterations) {
-            z = z.mul(z).add(c);
-            it++;
+            if (showingSet === 'mandelbrot') {
+                var z = new Complex(0, 0);
+                var c = new Complex(re, im);
+                var it = 0;
+                while (z.abs() < 2 && it < iterations) {
+                    z = z.mul(z).add(c);
+                    it++;
+                }
+                return it;
+            } else if (showingSet === 'burning-ship') {
+                var z = new Complex(0, 0);
+                var c = new Complex(re, im);
+                var it = 0;
+                while (z.abs() < 2 && it < iterations) {
+                    z = z.absolute().mul(z.absolute()).add(c);
+                    it++;
+                }
+                return it;
             }
-            return it;
+
         }
 
         var canvas = document.getElementById('canvas');
@@ -112,6 +133,8 @@
         function notLoading() {
             document.getElementById('loading').classList.add('hidden')
         };
+
+        var showingSet = 'mandelbrot';
         var globalMaxIterations = 100; 
         var windowWidth = 700;
         windowWidth = windowWidth - 60;
@@ -137,6 +160,9 @@
         const iterationsAdd = document.getElementById('iterations-add');
         const iterationsSub = document.getElementById('iterations-sub');
 
+        const changeMandel = document.getElementById('change-mandelbrot');
+        const changeBurning = document.getElementById('change-burning');
+
         zoomIn.addEventListener('click', () => zoom('in'));
         zoomOut.addEventListener('click', () => zoom('out'));
 
@@ -147,6 +173,9 @@
 
         iterationsAdd.addEventListener('click', () => changeIterations('add'));
         iterationsSub.addEventListener('click', () => changeIterations('sub'));
+
+        changeMandel.addEventListener('click', () => change('mandelbrot'));
+        changeBurning.addEventListener('click', () => change('burning-ship'));
 
         function zoom(direction) {
             //loading();
@@ -195,6 +224,11 @@
             document.getElementById('iterations-value').innerText = globalMaxIterations;
         }
 
+        function change(newSet) {
+            showingSet = newSet;
+            draw(windowWidth, windowWidth, globalMaxIterations, minRe, maxRe, minIm, maxIm);
+        }
+
     </script>
     <style>
         body {
@@ -216,7 +250,7 @@
             bottom: 5px;
             left: 5px;
             background: #111e;
-            height: 300px;
+            height: 400px;
             width: 150px;
             border-radius: 20px;
             display: flex;
